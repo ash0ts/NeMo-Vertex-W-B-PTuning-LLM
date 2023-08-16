@@ -86,7 +86,7 @@ def parse_args():
         help="A flag used to compute logprob of all the input text, a very special case of running inference, default False",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=5, help="Batch size for inference"
+        "--batch_size", type=int, default=1, help="Batch size for inference"
     )
 
     # Trainer configs
