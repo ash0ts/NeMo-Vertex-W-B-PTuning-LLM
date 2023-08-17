@@ -18,9 +18,11 @@ def parse_args():
 
 def main(args):
     run = wandb.init(
+#         entity="launch-test",
+        entity="a-sh0ts",
         project="NeMo_Megatron_PTuning",
         name=f"data_prep_squad@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
-        config=args,
+        config=args
     )
     args = run.config
 
@@ -74,7 +76,7 @@ def main(args):
     data_artifact = wandb.Artifact(name="squad", type="datasets")
     data_artifact.add_dir(OUTPUT_DIR)
     run.log_artifact(data_artifact)
-    run.log_code()
+    run.log_code() 
     run.finish()
 
 

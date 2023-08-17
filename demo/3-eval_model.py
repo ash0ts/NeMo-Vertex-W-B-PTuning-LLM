@@ -1,4 +1,3 @@
-import argparse
 import os
 from datetime import datetime
 
@@ -19,76 +18,28 @@ from omegaconf.omegaconf import open_dict
 from pytorch_lightning.plugins.environments import TorchElasticEnvironment
 from pytorch_lightning.trainer.trainer import Trainer
 from utils import download_file
-
+import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NeMo Megatron PTuning - Evaluation")
-
+    
     parser.add_argument("--output_dir", default="output", help="Output directory.")
-
+    
     # Add argparse parameters for the `inference` block
     # Add argparse parameters for the `inference` block with default values
-    parser.add_argument(
-        "--greedy",
-        type=bool,
-        default=False,
-        help="Whether or not to use sampling; use greedy decoding otherwise",
-    )
-    parser.add_argument(
-        "--top_k",
-        type=int,
-        default=0,
-        help="The number of highest probability vocabulary tokens to keep for top-k-filtering.",
-    )
-    parser.add_argument(
-        "--top_p",
-        type=float,
-        default=0.9,
-        help="If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation.",
-    )
-    parser.add_argument(
-        "--temperature", type=float, default=1.0, help="Sampling temperature"
-    )
-    parser.add_argument(
-        "--add_BOS",
-        type=bool,
-        default=True,
-        help="Add the bos token at the beginning of the prompt",
-    )
-    parser.add_argument(
-        "--tokens_to_generate",
-        type=int,
-        default=30,
-        help="The minimum length of the sequence to be generated.",
-    )
-    parser.add_argument(
-        "--all_probs",
-        type=bool,
-        default=False,
-        help="Whether return the log prob for all the tokens in vocab",
-    )
-    parser.add_argument(
-        "--repetition_penalty",
-        type=float,
-        default=1.2,
-        help="The parameter for repetition penalty. 1.0 means no penalty.",
-    )
-    parser.add_argument(
-        "--min_tokens_to_generate",
-        type=int,
-        default=0,
-        help="The minimum length of the sequence to be generated.",
-    )
-    parser.add_argument(
-        "--compute_logprob",
-        type=bool,
-        default=False,
-        help="A flag used to compute logprob of all the input text, a very special case of running inference, default False",
-    )
-    parser.add_argument(
-        "--batch_size", type=int, default=1, help="Batch size for inference"
-    )
+    parser.add_argument('--greedy', type=bool, default=False, help='Whether or not to use sampling; use greedy decoding otherwise')
+    parser.add_argument('--top_k', type=int, default=0, help='The number of highest probability vocabulary tokens to keep for top-k-filtering.')
+    parser.add_argument('--top_p', type=float, default=0.9, help='If set to float < 1, only the most probable tokens with probabilities that add up to top_p or higher are kept for generation.')
+    parser.add_argument('--temperature', type=float, default=1.0, help='Sampling temperature')
+    parser.add_argument('--add_BOS', type=bool, default=True, help='Add the bos token at the beginning of the prompt')
+    parser.add_argument('--tokens_to_generate', type=int, default=30, help='The minimum length of the sequence to be generated.')
+    parser.add_argument('--all_probs', type=bool, default=False, help='Whether return the log prob for all the tokens in vocab')
+    parser.add_argument('--repetition_penalty', type=float, default=1.2, help='The parameter for repetition penalty. 1.0 means no penalty.')
+    parser.add_argument('--min_tokens_to_generate', type=int, default=0, help='The minimum length of the sequence to be generated.')
+    parser.add_argument('--compute_logprob', type=bool, default=False, help='A flag used to compute logprob of all the input text, a very special case of running inference, default False')
+    parser.add_argument('--batch_size', type=int, default=1, help='Batch size for inference')
 
+    
     # Trainer configs
     parser.add_argument(
         "--accelerator",
@@ -96,9 +47,7 @@ def parse_args():
         help="Accelerator - GPU or CPU.",
     )
     parser.add_argument("--devices", default=1, type=int, help="Number of devices.")
-    parser.add_argument(
-        "--enable_checkpointing",
-        action="store_true",
+    parser.add_argument("--enable_checkpointing", action="store_true",
         help="Whether to enable checkpoints during inference. Default is to not to",
     )
     parser.add_argument(
@@ -107,7 +56,7 @@ def parse_args():
         type=int,
         help="Training precision.",
     )
-
+    
     # Experiment manager configs
     parser.add_argument(
         "--name", default="NeMo_Megatron_PTuning", help="Name of the experiment."
@@ -127,12 +76,13 @@ def parse_args():
         "--project", default="NeMo_Megatron_PTuning", help="WandB project name."
     )
     parser.add_argument("--log_model", default="all", help="Log model in WandB.")
-
+    
     return parser.parse_args()
-
+    
 
 def main(args):
     run = wandb.init(
+        entity="launch-test",
         project="NeMo_Megatron_PTuning",
         name=f"eval@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args,
@@ -169,7 +119,7 @@ def main(args):
     )
     cfg = OmegaConf.load(CONFIG_PATH)
     OmegaConf.set_struct(cfg, False)
-
+    
     # Override configuration values with command line arguments
     cfg.inference.greedy = args.greedy
     cfg.inference.top_k = args.top_k

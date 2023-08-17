@@ -108,9 +108,10 @@ def parse_args():
 
 def main(args):
     run = wandb.init(
+        entity="launch-test",
         project="NeMo_Megatron_PTuning",
         name=f"train@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
-        config=args,
+        config=args
     )
     args = run.config
     squad_art_path = run.use_artifact("squad:latest", type="datasets").download()
