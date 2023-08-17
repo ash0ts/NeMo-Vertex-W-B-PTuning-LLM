@@ -19,6 +19,10 @@ from pytorch_lightning.plugins.environments import TorchElasticEnvironment
 from pytorch_lightning.trainer.trainer import Trainer
 from utils import download_file
 import argparse
+import subprocess
+
+# set_cuda_env.set_environment()
+subprocess.run("./set_cuda.sh")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NeMo Megatron PTuning - Evaluation")
@@ -82,12 +86,14 @@ def parse_args():
 
 def main(args):
     run = wandb.init(
-        entity="launch-test",
+        entity="a-sh0ts",
+        # entity="launch-test",
         project="NeMo_Megatron_PTuning",
         name=f"eval@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args,
     )
     args = run.config
+    subprocess.run("nvidia-smi")
     squad_art_path = run.use_artifact("squad:latest", type="datasets").download()
     SQUAD_DIR = os.path.join(squad_art_path, "data", "SQuAD")
 
@@ -326,7 +332,7 @@ def main(args):
     print("***************************")
 
     wandb.log({"prediction_table": prediction_table})
-    wandb.run.log_code()
+    # wandb.run.log_code()
     wandb.finish()
 
 

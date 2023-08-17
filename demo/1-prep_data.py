@@ -6,6 +6,8 @@ from datetime import datetime
 import wandb
 from utils import download_file, subset_jsonl
 
+# set_cuda_env.set_environment()
+subprocess.run("./set_cuda.sh")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NeMo Megatron PTuning - Data Prep")
@@ -18,14 +20,14 @@ def parse_args():
 
 def main(args):
     run = wandb.init(
-#         entity="launch-test",
+        # entity="launch-test",
         entity="a-sh0ts",
         project="NeMo_Megatron_PTuning",
         name=f"data_prep_squad@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args
     )
     args = run.config
-
+    subprocess.run("nvidia-smi")
     # You can replace DATA_DIR and NEMO_DIR with your own locations
     OUTPUT_DIR = args.output_dir
     DATA_DIR = os.path.join(OUTPUT_DIR, "data")
@@ -76,7 +78,7 @@ def main(args):
     data_artifact = wandb.Artifact(name="squad", type="datasets")
     data_artifact.add_dir(OUTPUT_DIR)
     run.log_artifact(data_artifact)
-    run.log_code() 
+    # run.log_code() 
     run.finish()
 
 

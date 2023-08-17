@@ -1,0 +1,1 @@
+wandb launch -j a-sh0ts/NeMo_Megatron_PTuning/job-ash0ts_nvidia-vertex-wb-demo:latest -q anish-nvidia-vm -e a-sh0ts -E './find_cuda_version.sh' -R resource_args.json

@@ -1,0 +1,13 @@
+{
+    "local-container": {
+        "runtime": "nvidia",
+        "publish": [
+            "8888:8888",
+            "6006:6006"
+        ],
+        "ulimit": [
+            "memlock=-1",
+            "stack=67108864"
+        ]
+    }
+}

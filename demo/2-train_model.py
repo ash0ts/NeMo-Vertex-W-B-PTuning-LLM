@@ -20,6 +20,8 @@ from omegaconf import OmegaConf
 from pytorch_lightning.plugins.environments import TorchElasticEnvironment
 from utils import download_file
 
+# set_cuda_env.set_environment()
+subprocess.run("./set_cuda.sh")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NeMo Megatron PTuning - Training")
@@ -48,7 +50,7 @@ def parse_args():
     )
     parser.add_argument("--devices", default=1, type=int, help="Number of devices.")
     parser.add_argument(
-        "--max_epochs", default=10, type=int, help="Maximum number of training epochs."
+        "--max_epochs", default=2, type=int, help="Maximum number of training epochs."
     )
     parser.add_argument(
         "--val_check_interval",
@@ -108,12 +110,14 @@ def parse_args():
 
 def main(args):
     run = wandb.init(
-        entity="launch-test",
+        # entity="launch-test",
+        entity="a-sh0ts",
         project="NeMo_Megatron_PTuning",
         name=f"train@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args
     )
     args = run.config
+    subprocess.run("nvidia-smi")
     squad_art_path = run.use_artifact("squad:latest", type="datasets").download()
     SQUAD_DIR = os.path.join(squad_art_path, "data", "SQuAD")
     OUTPUT_DIR = args.output_dir
@@ -248,7 +252,7 @@ def main(args):
     final_chkpt.add_file(trained_model_chkpt)
     final_chkpt.add_dir(NEMO_DIR, name="nemo_assets")
     wandb.log_artifact(final_chkpt)
-    wandb.run.log_code()
+    # wandb.run.log_code()
     wandb.finish()
 
 
