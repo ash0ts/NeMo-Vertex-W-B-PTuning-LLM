@@ -21,7 +21,7 @@ from utils import download_file
 import argparse
 import subprocess
 import gc
-from evaluate import load
+import json
 
 #Free leftover used cuda memory
 gc.collect()
@@ -99,7 +99,7 @@ def main(args):
     run = wandb.init(
         entity="a-sh0ts",
         # entity="launch-test",
-        project="NeMo_Megatron_PTuning-2",
+        project="NeMo_Megatron_PTuning-demo",
         name=f"promote@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args,
     )
@@ -344,8 +344,6 @@ def main(args):
         model.set_inference_config(config)
 
         response = trainer.predict(model, dataloader)
-        
-        import json
         
         test_data_path = cfg.data_paths[0]
 

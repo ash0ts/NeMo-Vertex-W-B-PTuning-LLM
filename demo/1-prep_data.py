@@ -22,7 +22,7 @@ def main(args):
     run = wandb.init(
         # entity="launch-test",
         entity="a-sh0ts",
-        project="NeMo_Megatron_PTuning-2",
+        project="NeMo_Megatron_PTuning-demo",
         name=f"data_prep_squad@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args
     )
@@ -66,13 +66,13 @@ def main(args):
 
     # Using the function for your files
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_train.jsonl", f"{SQUAD_DIR}/squad_short_train.jsonl", 2000
+        f"{SQUAD_DIR}/squad_train.jsonl", f"{SQUAD_DIR}/squad_short_train.jsonl", 50000
     )
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_val.jsonl", f"{SQUAD_DIR}/squad_short_val.jsonl", 200
+        f"{SQUAD_DIR}/squad_val.jsonl", f"{SQUAD_DIR}/squad_short_val.jsonl", 5000
     )
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_test.jsonl", f"{SQUAD_DIR}/squad_short_test.jsonl", 2000
+        f"{SQUAD_DIR}/squad_test.jsonl", f"{SQUAD_DIR}/squad_short_test.jsonl", 5000
     )
 
     data_artifact = wandb.Artifact(name="squad", type="datasets")
