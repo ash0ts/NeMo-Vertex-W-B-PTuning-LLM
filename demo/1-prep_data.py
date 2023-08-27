@@ -66,13 +66,13 @@ def main(args):
 
     # Using the function for your files
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_train.jsonl", f"{SQUAD_DIR}/squad_short_train.jsonl", 50000
+        f"{SQUAD_DIR}/squad_train.jsonl", f"{SQUAD_DIR}/squad_short_train.jsonl", 20000
     )
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_val.jsonl", f"{SQUAD_DIR}/squad_short_val.jsonl", 5000
+        f"{SQUAD_DIR}/squad_val.jsonl", f"{SQUAD_DIR}/squad_short_val.jsonl", 2000
     )
     subset_jsonl(
-        f"{SQUAD_DIR}/squad_test.jsonl", f"{SQUAD_DIR}/squad_short_test.jsonl", 5000
+        f"{SQUAD_DIR}/squad_test.jsonl", f"{SQUAD_DIR}/squad_short_test.jsonl", 2000
     )
 
     data_artifact = wandb.Artifact(name="squad", type="datasets")
