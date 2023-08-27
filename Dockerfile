@@ -14,6 +14,8 @@ RUN ./set_cuda.sh
 # Install additional Python packages
 RUN pip install ujson
 RUN pip install evaluate
+RUN pip install --upgrade urllib3 chardet charset_normalizer
+RUN pip install --upgrade numexpr
 RUN pip install --upgrade wandb
 # RUN pip install light-the-torch
 # RUN pip uninstall -y torch torchvision torchaudio torchdata torchmetrics

@@ -1,7 +1,7 @@
 # config.yaml
 program: 2-train_model.py
 method: random
-project: NeMo_Megatron_PTuning-2
+project: NeMo_Megatron_PTuning-demo
 name: ptuning_sweep
 metric:
   goal: minimize
