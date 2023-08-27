@@ -89,7 +89,7 @@ def parse_args():
     
     parser.add_argument('--nth_model', type=int, default="0", help='Model to eval from the top sorted by ascending order of sorted_by_metric arg (Must be in the top 3). Start with 0')
     parser.add_argument(
-        "--sorted_by_metric", default="val_loss", help="Metric to sort and select the model to eval over"
+        "--sorted_by_metric", default="f1", help="Metric to sort and select the model to eval over"
     )
     
     return parser.parse_args()
@@ -100,7 +100,7 @@ def main(args):
         entity="a-sh0ts",
         # entity="launch-test",
         project="NeMo_Megatron_PTuning-2",
-        name=f"eval@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
+        name=f"promote@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args,
     )
     args = run.config
@@ -141,7 +141,7 @@ def main(args):
     cfg.inference.compute_logprob = args.compute_logprob
     cfg.inference.batch_size = args.batch_size
 
-    cfg.data_paths = [os.path.join(SQUAD_DIR, "squad_short_val.jsonl")]
+    cfg.data_paths = [os.path.join(SQUAD_DIR, "squad_short_test.jsonl")]
 
     mp.set_start_method("spawn", force=True)
 
@@ -183,20 +183,20 @@ def main(args):
     exp_dir = exp_manager(trainer, cfg.get("exp_manager", None))
     exp_dir = str(exp_dir)
     
-    def top_n_models_by_metric(model_arts, n=3, by="val_loss"):
+    def top_n_models_by_metadata_metric(model_arts, n=3, by="f1"):
         # Collect (model_art, metric, model_run) tuples in one pass
-        model_data = [(model_art, model_art.logged_by().summary_metrics[by], model_art.logged_by()) 
-                      for model_art in model_arts]
+        model_data = [(model_art, model_art.metadata.get(by), model_art.logged_by()) 
+                      for model_art in model_arts if model_art.metadata.get(by) is not None]
 
-        # Sort based on the metric (2nd item in each tuple) and take the first n
-        sorted_model_data = sorted(model_data, key=lambda x: x[1])[:n]
+        # Sort based on the metric (2nd item in each tuple) in descending order
+        sorted_model_data = sorted(model_data, key=lambda x: x[1], reverse=True)[:n]
 
         # Return list of tuples (model_art, model_run)
         return [(model_art, model_run) for model_art, _, model_run in sorted_model_data]
     
     api = wandb.Api()
     model_arts = api.artifact_versions("model", "a-sh0ts/NeMo_Megatron_PTuning-2/final_model_checkpoints")
-    top_n_models = top_n_models_by_metric(model_arts, n=3, by=args.sorted_by_metric)
+    top_n_models = top_n_models_by_metadata_metric(model_arts, n=3, by=args.sorted_by_metric)
 
     # BUG: iterating over different parameters for a nemo loaded model causes issues. so cant eval in one script
     top_n_models = [top_n_models[args.nth_model]]
@@ -356,7 +356,7 @@ def main(args):
         dataset = load_jsonl(test_data_path)
 
         prediction_table = wandb.Table(
-            columns=["model_art_id", "model_run_url", "i", "full_output", "context", "question", "predicted_answer", "true_answer", "exact_match", "f1_score"]
+            columns=["model_art_id", "model_run_url", "i", "full_output", "context", "question", "predicted_answer"]
         )
 
         def split_text(text):
@@ -380,9 +380,6 @@ def main(args):
 
 
         print("***************************")
-        predictions = []
-        references = []
-        squad_metric = load("squad")
         for i in range(len(response)):
             for sent in response[i]["sentences"]:
                 sent = sent.strip()
@@ -394,30 +391,12 @@ def main(args):
                 predicted_answer = _predicted_answer
             else:
                 predicted_answer = ""
-            prediction = {
-                    #check if string or list and then unpack
-                    "prediction_text": predicted_answer,
-                    "id": str(i)
-                }
-            predictions.append(prediction)
 
-            datum = dataset[i]
-            true_answer = datum["answer"]
-            answer_start = context[0].find(true_answer)
-            if answer_start == -1:
-                answer_start = 0
-            reference = {'answers': {'answer_start': [answer_start], 'text': [true_answer]}, 'id': str(i)}
-            references.append(reference)
-
-            results = squad_metric.compute(predictions=[prediction], references=[reference])
-
-            prediction_table.add_data(model_art.id, model_run.url, i, sent, context, question, predicted_answer, true_answer, results["exact_match"], results["f1"])
+            prediction_table.add_data(model_art.id, model_run.url, i, sent, context, question, predicted_answer)
         print("***************************")
         
-        final_results = squad_metric.compute(predictions=predictions, references=references)
-        wandb.log({"prediction_table": prediction_table, **final_results})
-        model_art.metadata.update(final_results)
-        model_art.save()
+        wandb.log({"prediction_table": prediction_table})
+        model_art.link("a-sh0ts/model-registry/squad-model-demo", aliases=["latest", "candidate"])
         
         #Free leftover used cuda memory
 #         del model, dataloader

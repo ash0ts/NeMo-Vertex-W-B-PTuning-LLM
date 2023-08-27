@@ -22,7 +22,7 @@ def main(args):
     run = wandb.init(
         # entity="launch-test",
         entity="a-sh0ts",
-        project="NeMo_Megatron_PTuning",
+        project="NeMo_Megatron_PTuning-2",
         name=f"data_prep_squad@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args
     )

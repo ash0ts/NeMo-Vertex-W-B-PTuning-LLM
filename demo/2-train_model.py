@@ -19,6 +19,11 @@ from nemo.utils.exp_manager import exp_manager
 from omegaconf import OmegaConf
 from pytorch_lightning.plugins.environments import TorchElasticEnvironment
 from utils import download_file
+import gc
+
+#Free leftover used cuda memory
+gc.collect()
+torch.cuda.empty_cache()
 
 # set_cuda_env.set_environment()
 subprocess.run("./set_cuda.sh")
@@ -50,7 +55,7 @@ def parse_args():
     )
     parser.add_argument("--devices", default=1, type=int, help="Number of devices.")
     parser.add_argument(
-        "--max_epochs", default=2, type=int, help="Maximum number of training epochs."
+        "--max_epochs", default=1, type=int, help="Maximum number of training epochs."
     )
     parser.add_argument(
         "--val_check_interval",
@@ -112,12 +117,13 @@ def main(args):
     run = wandb.init(
         # entity="launch-test",
         entity="a-sh0ts",
-        project="NeMo_Megatron_PTuning",
+        project="NeMo_Megatron_PTuning-2",
         name=f"train@{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}",
         config=args
     )
     args = run.config
     subprocess.run("nvidia-smi")
+    
     squad_art_path = run.use_artifact("squad:latest", type="datasets").download()
     SQUAD_DIR = os.path.join(squad_art_path, "data", "SQuAD")
     OUTPUT_DIR = args.output_dir
@@ -241,6 +247,37 @@ def main(args):
     ]
 
     response = model.generate(inputs=test_examples, length_params=None)
+    
+    prediction_table = wandb.Table(
+        columns=["prediction", "context", "question", "answer"]
+    )
+
+    def split_text(text):
+        split_text = text.split("  ")
+        context = [
+            i.replace("Context: ", "").strip()
+            for i in split_text
+            if i.startswith("Context:")
+        ]
+        question = [
+            i.replace("Question: ", "").strip()
+            for i in split_text
+            if i.startswith("Question:")
+        ]
+        answer = [
+            i.replace("Answer:", "").strip()
+            for i in split_text
+            if i.startswith("Answer:")
+        ]
+        return (context, question, answer)
+
+    for sent in response["sentences"]:
+        sent = sent.strip()
+        sent = sent.replace("\n", " ")
+        context, question, answer = split_text(sent)
+        prediction_table.add_data(sent, context, question, answer)
+
+    wandb.log({"test_example_table": prediction_table})
 
     print("The prediction results of some sample queries with the trained model:")
     for result in response["sentences"]:
