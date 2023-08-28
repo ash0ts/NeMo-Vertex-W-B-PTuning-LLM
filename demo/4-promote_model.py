@@ -195,7 +195,7 @@ def main(args):
         return [(model_art, model_run) for model_art, _, model_run in sorted_model_data]
     
     api = wandb.Api()
-    model_arts = api.artifact_versions("model", "a-sh0ts/NeMo_Megatron_PTuning-2/final_model_checkpoints")
+    model_arts = api.artifact_versions("model", "a-sh0ts/NeMo_Megatron_PTuning-demo/final_model_checkpoints")
     top_n_models = top_n_models_by_metadata_metric(model_arts, n=3, by=args.sorted_by_metric)
 
     # BUG: iterating over different parameters for a nemo loaded model causes issues. so cant eval in one script
