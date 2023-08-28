@@ -188,7 +188,7 @@ def main(args):
     def top_n_models_by_metric(model_arts, n=3, by="val_loss"):
         # Collect (model_art, metric, model_run) tuples in one pass
         model_data = [(model_art, model_art.logged_by().summary_metrics[by], model_art.logged_by()) 
-                      for model_art in model_arts]
+                      for model_art in model_arts if isinstance(model_art.logged_by().summary_metrics[by], float)]
 
         # Sort based on the metric (2nd item in each tuple) and take the first n
         sorted_model_data = sorted(model_data, key=lambda x: x[1])[:n]
