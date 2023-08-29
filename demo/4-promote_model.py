@@ -201,6 +201,7 @@ def main(args):
     # BUG: iterating over different parameters for a nemo loaded model causes issues. so cant eval in one script
     top_n_models = [top_n_models[args.nth_model]]
     for model_art, model_run in top_n_models:
+        run.use_artifact(model_art)
         final_chkpt_path = model_art.download()
         tuned_model_path = os.path.join(final_chkpt_path, "NeMo_Megatron_PTuning.nemo")
         gpt_model_file = os.path.join(

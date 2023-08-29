@@ -6,9 +6,15 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+#Need to first login to nvcr to get access to Framework container
+docker login nvcr.io
+
 # Build the Docker image
 # docker build . -t nvidia-vertex-wb-demo --no-cache
 docker build . -t nvidia-vertex-wb-demo
+
+#Log back into personal account
+docker login
 
 # # Tag and push the Docker image to Docker Hub
 docker tag nvidia-vertex-wb-demo:latest ash0ts/nvidia-vertex-wb-demo:latest
@@ -20,4 +26,5 @@ docker run \
     -e WANDB_DOCKER="ash0ts/nvidia-vertex-wb-demo" \
     --runtime=nvidia -p 8888:8888 -p 6006:6006 --ulimit memlock=-1 --ulimit stack=67108864 \
     ash0ts/nvidia-vertex-wb-demo \
+    /opt/nvidia/nvidia_entrypoint.sh \
     python $1

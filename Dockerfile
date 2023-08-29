@@ -15,6 +15,3 @@ RUN ./set_cuda.sh
 RUN pip install ujson
 RUN pip install evaluate
 RUN pip install --upgrade wandb
-# RUN pip install light-the-torch
-# RUN pip uninstall -y torch torchvision torchaudio torchdata torchmetrics
-# RUN ltt install torch torchvision torchaudio torchdata torchmetrics
